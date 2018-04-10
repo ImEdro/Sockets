@@ -89,10 +89,9 @@ public class WuatsapServer extends JFrame {
                     for (int i = 0; i < clientes.size(); i++) {
                         Socket cliente = clientes.get(i);
                         DataInputStream entrada = new DataInputStream(cliente.getInputStream());
-                        if (cliente != clientes.get(i)) {
-                            DataOutputStream salida = new DataOutputStream(cliente.getOutputStream());
-                            salida.writeUTF(texto);
-                        }
+
+                        DataOutputStream salida = new DataOutputStream(cliente.getOutputStream());
+                        salida.writeUTF(texto);
 
                     }
                 }

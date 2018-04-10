@@ -13,6 +13,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -28,27 +32,14 @@ import javax.swing.JToolBar;
 public class WuatsapClient extends JFrame {
 
     private JTextField escritor = new JTextField();
-    private JTextArea visor = new JTextArea();
-    Icon bravo = new ImageIcon("bravo.png");
-    Icon diablito = new ImageIcon("diablito.png");
-    Icon enamorado = new ImageIcon("enamorado.png");
-    Icon llorando = new ImageIcon("llorando.png");
-    Icon mico = new ImageIcon("mico.png");
-    Icon mirada = new ImageIcon("mirada.png");
-    Icon muelas = new ImageIcon("muelas.png");
-    Icon perro = new ImageIcon("perro.png");
-    Icon risa = new ImageIcon("risa.png");
-    Icon sisa = new ImageIcon("sisa.png");
-    Icon sorpresa = new ImageIcon("sorpresa.png");
-    Icon uñas = new ImageIcon("uñas.png");
-    Icon fantasma = new ImageIcon("fantasma.png");
+    private static JTextArea visor = new JTextArea();
     private JButton adjuntar = new JButton("Adjuntar", new ImageIcon("adjuntar.png"));
     private DataOutputStream toServer;
     private DataInputStream fromServer;
     private JToolBar toolbar = new JToolBar("Emojis");
     private Socket socket;
 
-    public WuatsapClient() {
+    public WuatsapClient() throws NoSuchAlgorithmException {
 
         JPanel p = new JPanel();
         p.setLayout(new BorderLayout());
@@ -72,7 +63,7 @@ public class WuatsapClient extends JFrame {
 
         try {
 
-            socket = new Socket("localhost", 8000);
+            socket = new Socket("172.30.10.134", 8000);
             fromServer = new DataInputStream(socket.getInputStream());
             toServer = new DataOutputStream(socket.getOutputStream());
 
@@ -81,7 +72,7 @@ public class WuatsapClient extends JFrame {
                 String texto = fromServer.readUTF();
 
                 visor.append("Servidor: " + texto + "\n");
-
+                separarFrase(texto);
             }
 
         } catch (IOException ex) {
@@ -94,121 +85,91 @@ public class WuatsapClient extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
+                String password = "123456";
 
-                String texto = escritor.getText().trim();
+                MessageDigest md = MessageDigest.getInstance("SHA-256");
+                md.update(password.getBytes());
 
-                toServer.writeUTF(socket.getLocalAddress() + ": " + texto);
+                byte byteData[] = md.digest();
+
+                StringBuffer hexString = new StringBuffer();
+                for (int i = 0; i < byteData.length; i++) {
+                    String hex = Integer.toHexString(0xff & byteData[i]);
+                    if (hex.length() == 1) {
+                        hexString.append('0');
+                    }
+                    hexString.append(hex);
+                }
+                String texto = password + ";" + hexString.toString();
+
+                toServer.writeUTF(texto);
                 toServer.flush();
                 escritor.setText("");
 
-                if (e.getActionCommand().equals("bravo")) {
-                    JOptionPane.showMessageDialog(visor, "Enviado con Exito");
-                    toServer.writeUTF("bravo");
-                    visor.append("Enviaste el emoji Bravo" + "\n");
-                    toServer.flush();
-                }
-                if (e.getActionCommand().equals("diablito")) {
-                    JOptionPane.showMessageDialog(visor, "Enviado con Exito");
-                    toServer.writeUTF("diablito");
-                    visor.append("Enviaste el emoji Picaro" + "\n");
-                    toServer.flush();
-                }
-                if (e.getActionCommand().equals("enamorado")) {
-                    JOptionPane.showMessageDialog(visor, "Enviado con Exito");
-                    toServer.writeUTF("enamorado");
-                    visor.append("Enviaste el emoji Enamorado" + "\n");
-                    toServer.flush();
-                }
-                if (e.getActionCommand().equals("llorando")) {
-                    JOptionPane.showMessageDialog(visor, "Enviado con Exito");
-                    toServer.writeUTF("llorando");
-                    visor.append("Enviaste el emoji Llorando" + "\n");
-                    toServer.flush();
-                }
-                if (e.getActionCommand().equals("mico")) {
-                    JOptionPane.showMessageDialog(visor, "Enviado con Exito");
-                    toServer.writeUTF("mico");
-                    visor.append("Enviaste el emoji del Mico" + "\n");
-                    toServer.flush();
-                }
-                if (e.getActionCommand().equals("mirada")) {
-                    JOptionPane.showMessageDialog(visor, "Enviado con Exito");
-                    toServer.writeUTF("mirada");
-                    visor.append("Enviaste el emoji Mirada" + "\n");
-                    toServer.flush();
-                }
-                if (e.getActionCommand().equals("muelas")) {
-                    JOptionPane.showMessageDialog(visor, "Enviado con Exito");
-                    toServer.writeUTF("muelas");
-                    visor.append("Enviaste el emoji Muelas" + "\n");
-                    toServer.flush();
-                }
-                if (e.getActionCommand().equals("perro")) {
-                    JOptionPane.showMessageDialog(visor, "Enviado con Exito");
-                    toServer.writeUTF("perro");
-                    visor.append("Enviaste el emoji del Perro" + "\n");
-                    toServer.flush();
-                }
-                if (e.getActionCommand().equals("risa")) {
-                    JOptionPane.showMessageDialog(visor, "Enviado con Exito");
-                    toServer.writeUTF("risa");
-                    visor.append("Enviaste el emoji Risa" + "\n");
-                    toServer.flush();
-                }
-                if (e.getActionCommand().equals("sisa")) {
-                    JOptionPane.showMessageDialog(visor, "Enviado con Exito");
-                    toServer.writeUTF("sisa");
-                    visor.append("Enviaste el emoji Sisa" + "\n");
-                    toServer.flush();
-                }
-                if (e.getActionCommand().equals("sorpresa")) {
-                    JOptionPane.showMessageDialog(visor, "Enviado con Exito");
-                    toServer.writeUTF("sorpresa");
-                    visor.append("Enviaste el emoji Sorprendido" + "\n");
-                    toServer.flush();
-                }
-                if (e.getActionCommand().equals("uñas")) {
-                    JOptionPane.showMessageDialog(visor, "Enviado con Exito");
-                    toServer.writeUTF("uñas");
-                    visor.append("Enviaste el emoji Uñas" + "\n");
-                    toServer.flush();
-                }
-                if (e.getActionCommand().equals("fantasma")) {
-                    JOptionPane.showMessageDialog(visor, "Enviado con Exito");
-                    toServer.writeUTF("fantasma");
-                    visor.append("Enviaste el emoji Fantasma" + "\n");
-                    toServer.flush();
-                }
-                if (e.getActionCommand().equals("Adjuntar")) {
-
-                    Object[] ruta = {"Ruta: "};
-                    String file = JOptionPane.showInputDialog(escritor, ruta, "Ingrese la ruta del archivo", WIDTH);
-
-                    if (file != null) {
-                        toServer.writeUTF("Adjuntar");
-                        JOptionPane.showMessageDialog(visor, "Ruta: " + file + " ingresada correctamente");
-                        JOptionPane.showMessageDialog(visor, "Archivo Enviado Con Exito");
-                        ObjectOutputStream archivoenviado = new ObjectOutputStream(toServer);
-                        FileInputStream CargaArchivo = new FileInputStream(file);
-                        byte[] bites = new byte[4096];
-                        while (true) {
-                            int paso = CargaArchivo.read(bites);
-                            if (paso == -1) {
-                                break;
-                            }
-                            archivoenviado.write(bites, 0, paso);
-
-                        }
-                    }
-                }
-
             } catch (IOException ex) {
                 System.err.println(ex);
+            } catch (NoSuchAlgorithmException ex) {
+                Logger.getLogger(WuatsapClient.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws NoSuchAlgorithmException {
         new WuatsapClient();
+    }
+
+    public static void separarFrase(String s) throws NoSuchAlgorithmException {
+        int cp = 0; // Cantidad de palabras
+
+        // Recorremos en busca de espacios
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) == ';') { // Si es un espacio
+                cp++; // Aumentamos en uno la cantidad de palabras
+            }
+        }
+
+        // "Este blog es genial" tiene 3 espacios y 3 + 1 palabras
+        String[] partes = new String[cp + 1];
+        for (int i = 0; i < partes.length; i++) {
+            partes[i] = ""; // Se inicializa en "" en lugar de null (defecto)
+        }
+
+        int ind = 0; // Creamos un índice para las palabras
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) == ';') { // Si hay un espacio
+                ind++; // Pasamos a la siguiente palabra
+                continue; // Próximo i
+            }
+            partes[ind] += s.charAt(i); // Sino, agregamos el carácter a la palabra actual
+        }
+        String resultado = igual(partes);
+        visor.append(resultado);
+        System.out.println(resultado);
+    }
+
+    public static String igual(String[] a) throws NoSuchAlgorithmException {
+        String respuesta;
+        String password = a[0];
+        String hash = a[1];
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        md.update(password.getBytes());
+
+        byte byteData[] = md.digest();
+
+        StringBuffer hexString = new StringBuffer();
+        for (int i = 0; i < byteData.length; i++) {
+            String hex = Integer.toHexString(0xff & byteData[i]);
+            if (hex.length() == 1) {
+                hexString.append('0');
+            }
+            hexString.append(hex);
+        }
+        if (hexString.toString().equals(hash)) {
+            respuesta = "Mensaje recibido: "+password+"\n Hash recibido:   "+hash+"\n Hash calculado: "+hexString.toString()+"\n Por lo tanto son iguales";
+        } else {
+            respuesta = "No son iguales";
+        }
+        return respuesta;
+
     }
 }
